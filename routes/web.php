@@ -5,6 +5,7 @@ use App\Http\Controllers\ProductController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\AdminController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -34,4 +35,8 @@ Route::delete('/cart/remove/{id}', [CartController::class, 'remove'])->name('car
 Route::middleware('auth')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
+});
+Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
+    Route::get('/product/add', [AdminController::class, 'create'])->name('admin.product.create');
+    Route::post('/product/store', [AdminController::class, 'store'])->name('admin.product.store');
 });
