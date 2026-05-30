@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\AdminController;
+use App\Http\Controllers\DashboardController; // <-- Added the new Dashboard Controller
 
 Route::get('/', function () {
     return view('welcome');
@@ -14,9 +15,8 @@ Route::get('/', function () {
 // The new public shop route
 Route::get('/shop', [ProductController::class, 'index'])->name('shop.index');
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+// New Dynamic Dashboard Route
+Route::get('/dashboard', [DashboardController::class, 'index'])->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -32,10 +32,13 @@ Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
 Route::delete('/cart/remove/{id}', [CartController::class, 'remove'])->name('cart.remove');
 
+// Checkout Routes (Must be logged in)
 Route::middleware('auth')->group(function () {
     Route::get('/checkout', [CheckoutController::class, 'index'])->name('checkout.index');
     Route::post('/checkout/process', [CheckoutController::class, 'process'])->name('checkout.process');
 });
+
+// Admin Only Routes
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/product/add', [AdminController::class, 'create'])->name('admin.product.create');
     Route::post('/product/store', [AdminController::class, 'store'])->name('admin.product.store');
