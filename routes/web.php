@@ -6,7 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\AdminController;
-use App\Http\Controllers\DashboardController; // <-- Added the new Dashboard Controller
+use App\Http\Controllers\DashboardController; 
 
 Route::get('/', function () {
     return view('welcome');
@@ -42,4 +42,7 @@ Route::middleware('auth')->group(function () {
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('/product/add', [AdminController::class, 'create'])->name('admin.product.create');
     Route::post('/product/store', [AdminController::class, 'store'])->name('admin.product.store');
+    
+    // New route for updating order status
+    Route::put('/order/{id}/status', [AdminController::class, 'updateOrderStatus'])->name('admin.order.update');
 });

@@ -43,10 +43,27 @@
                                         <td class="border-b py-3 px-4">{{ $order->shipping_address }}</td>
                                         <td class="border-b py-3 px-4 text-indigo-600 font-bold">৳{{ number_format($order->total_amount, 2) }}</td>
                                         <td class="border-b py-3 px-4">
-                                            <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-yellow-100 text-yellow-800">
-                                                {{ ucfirst($order->status) }}
-                                            </span>
-                                        </td>
+    @if(Auth::user()->is_admin)
+        <form action="{{ route('admin.order.update', $order->id) }}" method="POST" class="flex items-center space-x-2">
+            @csrf
+            @method('PUT')
+            <select name="status" class="text-sm border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>Pending</option>
+                <option value="shipped" {{ $order->status == 'shipped' ? 'selected' : '' }}>Shipped</option>
+                <option value="delivered" {{ $order->status == 'delivered' ? 'selected' : '' }}>Delivered</option>
+                <option value="canceled" {{ $order->status == 'canceled' ? 'selected' : '' }}>Canceled</option>
+            </select>
+            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-1 px-2 rounded transition">
+                Update
+            </button>
+        </form>
+    @else
+        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+            {{ $order->status == 'delivered' ? 'bg-green-100 text-green-800' : ($order->status == 'shipped' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800') }}">
+            {{ ucfirst($order->status) }}
+        </span>
+    @endif
+</td>
                                     </tr>
                                 @endforeach
                             </tbody>

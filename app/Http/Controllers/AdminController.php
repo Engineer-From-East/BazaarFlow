@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Order;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
@@ -41,5 +42,18 @@ class AdminController extends Controller
 
         // Redirect back with a success message
         return redirect()->route('admin.product.create')->with('success', 'New product added to the Bazaar successfully!');
+    }
+    // 3. Update the status of an order
+    public function updateOrderStatus(Request $request, $id)
+    {
+        $request->validate([
+            'status' => 'required|string|in:pending,shipped,delivered,canceled'
+        ]);
+
+        $order = Order::findOrFail($id);
+        $order->status = $request->status;
+        $order->save();
+
+        return redirect()->route('dashboard')->with('success', 'Order #' . $order->id . ' status updated to ' . ucfirst($order->status) . '.');
     }
 }
