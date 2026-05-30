@@ -15,9 +15,15 @@
                         <p class="text-sm text-gray-500 mb-2">Category: {{ $product->category->name }}</p>
                         <p class="text-gray-700 mb-4">{{ $product->description }}</p>
                         
-                        <div class="flex justify-between items-center mt-4">
+                        <div class="flex justify-between items-center mt-4 border-t pt-4">
                             <span class="text-xl font-extrabold text-indigo-600">৳{{ number_format($product->price, 2) }}</span>
-                            <span class="text-sm font-medium text-gray-500">Stock: {{ $product->stock }}</span>
+                            
+                            <form action="{{ route('cart.add', $product->id) }}" method="POST">
+                                @csrf
+                                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition">
+                                    Add to Cart
+                                </button>
+                            </form>
                         </div>
                     </div>
                 @endforeach
