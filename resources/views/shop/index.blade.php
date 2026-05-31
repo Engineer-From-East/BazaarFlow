@@ -10,21 +10,33 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 
                 @foreach ($products as $product)
-                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg p-6">
-                        <h3 class="text-lg font-bold text-gray-900">{{ $product->name }}</h3>
-                        <p class="text-sm text-gray-500 mb-2">Category: {{ $product->category->name }}</p>
-                        <p class="text-gray-700 mb-4">{{ $product->description }}</p>
+                    <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg flex flex-col">
                         
-                        <div class="flex justify-between items-center mt-4 border-t pt-4">
-                            <span class="text-xl font-extrabold text-indigo-600">৳{{ number_format($product->price, 2) }}</span>
+                        @if($product->image)
+                            <img src="{{ asset('storage/' . $product->image) }}" alt="{{ $product->name }}" class="w-full h-48 object-cover">
+                        @else
+                            <div class="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-500">
+                                No Image Available
+                            </div>
+                        @endif
+
+                        <div class="p-6 flex-1 flex flex-col">
+                            <h3 class="text-lg font-bold text-gray-900">{{ $product->name }}</h3>
+                            <p class="text-sm text-gray-500 mb-2">Category: {{ $product->category->name }}</p>
+                            <p class="text-gray-700 mb-4 flex-1">{{ $product->description }}</p>
                             
-                            <form action="{{ route('cart.add', $product->id) }}" method="POST">
-                                @csrf
-                                <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition">
-                                    Add to Cart
-                                </button>
-                            </form>
+                            <div class="flex justify-between items-center mt-4 border-t pt-4">
+                                <span class="text-xl font-extrabold text-indigo-600">৳{{ number_format($product->price, 2) }}</span>
+                                
+                                <form action="{{ route('cart.add', $product->id) }}" method="POST">
+                                    @csrf
+                                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-2 px-4 rounded transition">
+                                        Add to Cart
+                                    </button>
+                                </form>
+                            </div>
                         </div>
+
                     </div>
                 @endforeach
 

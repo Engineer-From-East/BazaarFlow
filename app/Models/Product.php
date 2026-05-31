@@ -16,7 +16,7 @@ class Product extends Model
         'description', 
         'price', 
         'stock', 
-        'image_path'
+        'image' // <-- Updated to match the migration perfectly!
     ];
 
     public function category()

@@ -19,29 +19,42 @@ class AdminController extends Controller
     }
 
     // 2. Process the form and save to the database
+    // 2. Process the form and save to the database
+    // 2. Process the form and save to the database
+    // 2. Process the form and save to the database
     public function store(Request $request)
     {
-        // Validate the incoming data
+        // Validate the incoming data (Now including the image!)
         $request->validate([
             'name' => 'required|string|max:255',
             'category_id' => 'required|integer',
             'description' => 'required|string',
             'price' => 'required|numeric|min:0',
             'stock' => 'required|integer|min:0',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048', // 2MB max
         ]);
 
-        // Create the new product with the auto-generated slug
+        // Handle the Image Upload
+        $imagePath = null;
+        if ($request->hasFile('image')) {
+            // This automatically saves the file to storage/app/public/products 
+            // and generates a unique, safe filename.
+            $imagePath = $request->file('image')->store('products', 'public');
+        }
+
+        // Create the new product with the image path included
         Product::create([
             'name' => $request->name,
-            'slug' => Str::slug($request->name), // <-- Generates URL-safe string
+            'slug' => Str::slug($request->name), 
             'category_id' => $request->category_id,
             'description' => $request->description,
             'price' => $request->price,
             'stock' => $request->stock,
+            'image' => $imagePath, // Save the file path to the database
         ]);
 
         // Redirect back with a success message
-        return redirect()->route('admin.product.create')->with('success', 'New product added to the Bazaar successfully!');
+        return redirect()->route('admin.product.create')->with('success', 'New product with image added to the Bazaar successfully!');
     }
     // 3. Update the status of an order
     public function updateOrderStatus(Request $request, $id)
