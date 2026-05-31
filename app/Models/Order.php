@@ -9,8 +9,14 @@ class Order extends Model
     protected $fillable = [
         'user_id', 
         'phone_number', 
-        'shipping_address', // <-- FIXED: Swapped back to shipping_address
+        'shipping_address', 
         'total_amount', 
         'status'
     ];
+
+    // NEW: An order has many items
+    public function items()
+    {
+        return $this->hasMany(OrderItem::class);
+    }
 }

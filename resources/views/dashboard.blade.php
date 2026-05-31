@@ -36,34 +36,51 @@
                             </thead>
                             <tbody>
                                 @foreach($orders as $order)
-                                    <tr class="hover:bg-gray-50">
-                                        <td class="border-b py-3 px-4 font-bold">#{{ $order->id }}</td>
-                                        <td class="border-b py-3 px-4">{{ $order->created_at->format('M d, Y') }}</td>
-                                        <td class="border-b py-3 px-4">{{ $order->phone_number }}</td>
-                                        <td class="border-b py-3 px-4">{{ $order->shipping_address }}</td>
-                                        <td class="border-b py-3 px-4 text-indigo-600 font-bold">৳{{ number_format($order->total_amount, 2) }}</td>
-                                        <td class="border-b py-3 px-4">
-    @if(Auth::user()->is_admin)
-        <form action="{{ route('admin.order.update', $order->id) }}" method="POST" class="flex items-center space-x-2">
-            @csrf
-            @method('PUT')
-            <select name="status" class="text-sm border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>Pending</option>
-                <option value="shipped" {{ $order->status == 'shipped' ? 'selected' : '' }}>Shipped</option>
-                <option value="delivered" {{ $order->status == 'delivered' ? 'selected' : '' }}>Delivered</option>
-                <option value="canceled" {{ $order->status == 'canceled' ? 'selected' : '' }}>Canceled</option>
-            </select>
-            <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-1 px-2 rounded transition">
-                Update
-            </button>
-        </form>
-    @else
-        <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
-            {{ $order->status == 'delivered' ? 'bg-green-100 text-green-800' : ($order->status == 'shipped' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800') }}">
-            {{ ucfirst($order->status) }}
-        </span>
-    @endif
-</td>
+                                    <tr class="hover:bg-gray-50 pt-2">
+                                        <td class="py-3 px-4 font-bold text-gray-800">#{{ $order->id }}</td>
+                                        <td class="py-3 px-4">{{ $order->created_at->format('M d, Y') }}</td>
+                                        <td class="py-3 px-4">{{ $order->phone_number }}</td>
+                                        <td class="py-3 px-4">{{ $order->shipping_address }}</td>
+                                        <td class="py-3 px-4 text-indigo-600 font-bold">৳{{ number_format($order->total_amount, 2) }}</td>
+                                        <td class="py-3 px-4">
+                                            @if(Auth::user()->is_admin)
+                                                <form action="{{ route('admin.order.update', $order->id) }}" method="POST" class="flex items-center space-x-2">
+                                                    @csrf
+                                                    @method('PUT')
+                                                    <select name="status" class="text-sm border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
+                                                        <option value="pending" {{ $order->status == 'pending' ? 'selected' : '' }}>Pending</option>
+                                                        <option value="shipped" {{ $order->status == 'shipped' ? 'selected' : '' }}>Shipped</option>
+                                                        <option value="delivered" {{ $order->status == 'delivered' ? 'selected' : '' }}>Delivered</option>
+                                                        <option value="canceled" {{ $order->status == 'canceled' ? 'selected' : '' }}>Canceled</option>
+                                                    </select>
+                                                    <button type="submit" class="bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold py-1 px-2 rounded transition">
+                                                        Update
+                                                    </button>
+                                                </form>
+                                            @else
+                                                <span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full 
+                                                    {{ $order->status == 'delivered' ? 'bg-green-100 text-green-800' : ($order->status == 'shipped' ? 'bg-blue-100 text-blue-800' : 'bg-yellow-100 text-yellow-800') }}">
+                                                    {{ ucfirst($order->status) }}
+                                                </span>
+                                            @endif
+                                        </td>
+                                    </tr>
+                                    
+                                    <tr class="border-b bg-gray-50/50">
+                                        <td colspan="6" class="pb-4 pt-1 px-4">
+                                            <div class="text-sm text-gray-700 bg-white p-3 rounded border border-gray-100 shadow-sm">
+                                                <strong class="font-semibold text-gray-900 uppercase text-xs tracking-wider">Items in this order:</strong>
+                                                <ul class="list-disc list-inside mt-2 space-y-1 ml-1">
+                                                    @foreach($order->items as $item)
+                                                        <li>
+                                                            <span class="font-medium">{{ $item->quantity }}x</span> 
+                                                            {{ $item->product->name ?? 'Unknown Product' }} 
+                                                            <span class="text-gray-500">(৳{{ number_format($item->price, 2) }} each)</span>
+                                                        </li>
+                                                    @endforeach
+                                                </ul>
+                                            </div>
+                                        </td>
                                     </tr>
                                 @endforeach
                             </tbody>

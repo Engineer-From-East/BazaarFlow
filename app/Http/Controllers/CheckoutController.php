@@ -43,14 +43,24 @@ class CheckoutController extends Controller
             $total += $details['price'] * $details['quantity'];
         }
 
-        // Create the official Order in the database!
-        Order::create([
+        // Create the official Order in the database AND capture it in a variable!
+        $order = Order::create([
             'user_id' => Auth::id(), // Links the order to the logged-in user
             'phone_number' => $request->phone,       
-            'shipping_address' => $request->address, // <-- FIXED: Swapped back to shipping_address!
+            'shipping_address' => $request->address, 
             'total_amount' => $total,
             'status' => 'pending' // All new orders start as pending
         ]);
+
+        // NEW: Loop through the session cart and save each item to the database
+        foreach ($cart as $id => $details) {
+            \App\Models\OrderItem::create([
+                'order_id' => $order->id, // The ID of the order we just created above
+                'product_id' => $id,      // The ID of the perfume
+                'quantity' => $details['quantity'],
+                'price' => $details['price']
+            ]);
+        }
 
         // Empty the cart so they don't accidentally buy it again
         session()->forget('cart');

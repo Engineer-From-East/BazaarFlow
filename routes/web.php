@@ -7,6 +7,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\DashboardController; 
+use App\Http\Controllers\AdminProductController; // <-- NEW: Added this controller
 
 Route::get('/', function () {
     return view('welcome');
@@ -26,7 +27,6 @@ Route::middleware('auth')->group(function () {
 
 require __DIR__.'/auth.php';
 
-
 // Cart Routes
 Route::get('/cart', [CartController::class, 'index'])->name('cart.index');
 Route::post('/cart/add/{id}', [CartController::class, 'add'])->name('cart.add');
@@ -40,9 +40,13 @@ Route::middleware('auth')->group(function () {
 
 // Admin Only Routes
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
-    Route::get('/product/add', [AdminController::class, 'create'])->name('admin.product.create');
-    Route::post('/product/store', [AdminController::class, 'store'])->name('admin.product.store');
     
-    // New route for updating order status
+    // Admin Product CRUD Routes (Replaced the old AdminController routes)
+    Route::get('/products', [AdminProductController::class, 'index'])->name('admin.products.index');
+    Route::get('/products/create', [AdminProductController::class, 'create'])->name('admin.products.create');
+    Route::post('/products', [AdminProductController::class, 'store'])->name('admin.products.store');
+    Route::delete('/products/{id}', [AdminProductController::class, 'destroy'])->name('admin.products.destroy');
+    
+    // Route for updating order status
     Route::put('/order/{id}/status', [AdminController::class, 'updateOrderStatus'])->name('admin.order.update');
 });
