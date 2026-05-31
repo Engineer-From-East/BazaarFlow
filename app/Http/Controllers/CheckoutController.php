@@ -4,66 +4,58 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Order;
-use App\Models\OrderItem;
 use Illuminate\Support\Facades\Auth;
 
 class CheckoutController extends Controller
 {
-    // Display the checkout form
+    // 1. Display the checkout page
     public function index()
     {
-        $cart = session()->get('cart');
-        if(!$cart || count($cart) == 0) {
-            return redirect()->route('shop.index')->with('error', 'Your cart is empty!');
+        $cart = session()->get('cart', []);
+        
+        // Security check: If cart is empty, kick them back to the shop
+        if (empty($cart)) {
+            return redirect()->route('shop.index')->with('error', 'Your cart is empty! Add some perfumes first.');
         }
-        return view('shop.checkout', compact('cart'));
+
+        return view('checkout.index', compact('cart'));
     }
 
-    // Process the final order
+    // 2. Process the order and save to database
     public function process(Request $request)
     {
-        $cart = session()->get('cart');
-        
-        // --- NEW SAFETY CHECK ---
-        // If the cart is empty or expired, send them back to the shop instead of crashing
-        if(!$cart || count($cart) == 0) {
-            return redirect()->route('shop.index')->with('error', 'Your session expired or cart is empty. Please add items again!');
-        }
-        // ------------------------
-
-        // Validate the Rajshahi delivery details
+        // Validate the incoming form data
         $request->validate([
-            'phone_number' => 'required|string|max:15',
-            'shipping_address' => 'required|string|max:500'
+            'phone' => 'required|string|max:20',
+            'address' => 'required|string'
         ]);
 
-        // Calculate final total
+        $cart = session()->get('cart', []);
+        
+        // Double check cart isn't empty before processing
+        if (empty($cart)) {
+            return redirect()->route('shop.index');
+        }
+
+        // Calculate the exact total amount from the session cart
         $total = 0;
-        foreach($cart as $details) {
+        foreach ($cart as $details) {
             $total += $details['price'] * $details['quantity'];
         }
 
-        // 1. Create the Order
-        $order = Order::create([
-            'user_id' => Auth::id(),
-            'phone_number' => $request->phone_number,
-            'shipping_address' => $request->shipping_address,
+        // Create the official Order in the database!
+        Order::create([
+            'user_id' => Auth::id(), // Links the order to the logged-in user
+            'phone_number' => $request->phone,       
+            'shipping_address' => $request->address, // <-- FIXED: Swapped back to shipping_address!
             'total_amount' => $total,
+            'status' => 'pending' // All new orders start as pending
         ]);
 
-        // 2. Create the Order Items
-        foreach($cart as $id => $details) {
-            OrderItem::create([
-                'order_id' => $order->id,
-                'product_id' => $id,
-                'quantity' => $details['quantity'],
-                'price' => $details['price'],
-            ]);
-        }
-
-        // 3. Clear the session cart
+        // Empty the cart so they don't accidentally buy it again
         session()->forget('cart');
 
-        return redirect()->route('dashboard')->with('success', 'Order placed successfully! We will deliver soon.');
+        // Redirect to their dashboard with a massive success message
+        return redirect()->route('dashboard')->with('success', 'Order Placed Successfully! We will deliver it soon.');
     }
 }
