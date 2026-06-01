@@ -4,55 +4,55 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Product;
+use App\Models\Category; // Required to fetch categories
 use Illuminate\Support\Facades\File;
 
 class AdminProductController extends Controller
 {
-    // 1. READ: Display a list of all products
     public function index()
     {
         $products = Product::latest()->get();
         return view('admin.products.index', compact('products'));
     }
 
-    // 2. CREATE: Show the form to add a new product
     public function create()
     {
-        return view('admin.products.create');
+        // Fetch all categories to send to the dropdown
+        $categories = Category::all();
+        return view('admin.products.create', compact('categories'));
     }
 
-    // 3. STORE: Save the new product and upload the image
     public function store(Request $request)
     {
-        // Validate the form data
+        // Validate the category_id along with the rest of the data
         $request->validate([
+            'category_id' => 'required|exists:categories,id',
             'name' => 'required|string|max:255',
             'description' => 'required|string',
             'price' => 'required|numeric',
-            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048', // 2MB Max
+            'stock' => 'required|integer|min:0',
+            'image' => 'required|image|mimes:jpeg,png,jpg,webp|max:2048', 
         ]);
 
-        // Handle the Image Upload
         $imageName = time() . '.' . $request->image->extension();  
-        $request->image->move(public_path('images'), $imageName); // Saves to public/images folder
+        $request->image->move(public_path('images'), $imageName); 
         
-        // Save to Database
         Product::create([
+            'category_id' => $request->category_id, // Save the selected category
             'name' => $request->name,
             'description' => $request->description,
             'price' => $request->price,
-            'image' => 'images/' . $imageName, // Stores the path
+            'stock' => $request->stock,
+            'image' => 'images/' . $imageName, 
         ]);
 
-        return redirect()->route('admin.products.index')->with('success', 'New perfume added successfully!');
+        return redirect()->route('admin.products.index')->with('success', 'New product added successfully!');
     }
 
-    // 4. DELETE: Remove a product from the database
     public function destroy($id)
     {
         $product = Product::findOrFail($id);
         
-        // Delete the image file from the server so it doesn't take up space
         if(File::exists(public_path($product->image))) {
             File::delete(public_path($product->image));
         }
