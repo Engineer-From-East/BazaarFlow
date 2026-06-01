@@ -6,7 +6,8 @@ use App\Models\Order;
 use Illuminate\Http\Request;
 use App\Models\Product;
 use App\Models\Category;
-use Illuminate\Support\Str; // <-- Added this to generate slugs
+use App\Models\User; // <-- NEW: Required to fetch the customers
+use Illuminate\Support\Str;
 
 class AdminController extends Controller
 {
@@ -18,9 +19,6 @@ class AdminController extends Controller
         return view('admin.create_product', compact('categories'));
     }
 
-    // 2. Process the form and save to the database
-    // 2. Process the form and save to the database
-    // 2. Process the form and save to the database
     // 2. Process the form and save to the database
     public function store(Request $request)
     {
@@ -56,11 +54,13 @@ class AdminController extends Controller
         // Redirect back with a success message
         return redirect()->route('admin.product.create')->with('success', 'New product with image added to the Bazaar successfully!');
     }
+    
     // 3. Update the status of an order
     public function updateOrderStatus(Request $request, $id)
     {
+        // FIXED: Added 'completed' to the allowed validation list so your new dashboard works perfectly!
         $request->validate([
-            'status' => 'required|string|in:pending,shipped,delivered,canceled'
+            'status' => 'required|string|in:pending,completed,shipped,delivered,canceled'
         ]);
 
         $order = Order::findOrFail($id);
@@ -68,5 +68,16 @@ class AdminController extends Controller
         $order->save();
 
         return redirect()->route('dashboard')->with('success', 'Order #' . $order->id . ' status updated to ' . ucfirst($order->status) . '.');
+    }
+
+    // ==========================================
+    // 4. NEW: Fetch Customer Accounts
+    // ==========================================
+    public function customers()
+    {
+        // Fetch all users who are NOT admins
+        $customers = User::where('is_admin', false)->latest()->get();
+        
+        return view('admin.customers', compact('customers'));
     }
 }
